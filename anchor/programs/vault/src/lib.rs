@@ -12,6 +12,8 @@ use anchor_spl::{
 const CORE_PROGRAM_ID: Pubkey = pubkey!("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d");
 
 #[cfg(test)]
+mod staking_tests;
+#[cfg(test)]
 mod tests;
 
 declare_id!("7tGGvLyrnSdFr5o8Qcfbw2spARwMfFCf7sv8bMZ3k9mv");
@@ -66,7 +68,7 @@ pub mod vault {
             &ctx.accounts.user,
             &ctx.accounts.user,
             &ctx.accounts.system_program,
-            vec![1, 1],
+            vec![2],
             ctx.accounts.authority.key(),
         )?;
         invoke_core_add_asset_plugin(
@@ -76,7 +78,7 @@ pub mod vault {
             &ctx.accounts.user,
             &ctx.accounts.user,
             &ctx.accounts.system_program,
-            vec![2],
+            vec![1, 1],
             ctx.accounts.authority.key(),
         )?;
 
@@ -172,6 +174,26 @@ pub mod vault {
             &ctx.accounts.authority,
             &ctx.accounts.system_program,
             vec![1, 0],
+            signer_seeds,
+        )?;
+        invoke_core_remove_asset_plugin(
+            &ctx.accounts.core_program,
+            &ctx.accounts.asset,
+            &ctx.accounts.collection,
+            &ctx.accounts.user,
+            &ctx.accounts.authority,
+            &ctx.accounts.system_program,
+            1,
+            signer_seeds,
+        )?;
+        invoke_core_remove_asset_plugin(
+            &ctx.accounts.core_program,
+            &ctx.accounts.asset,
+            &ctx.accounts.collection,
+            &ctx.accounts.user,
+            &ctx.accounts.authority,
+            &ctx.accounts.system_program,
+            2,
             signer_seeds,
         )?;
 
@@ -711,6 +733,39 @@ fn invoke_core_burn_asset<'info>(
             core_program.clone(),
         ],
         vec![12, 0],
+        signer_seeds,
+    )
+}
+
+fn invoke_core_remove_asset_plugin<'info>(
+    core_program: &AccountInfo<'info>,
+    asset: &AccountInfo<'info>,
+    collection: &AccountInfo<'info>,
+    payer: &AccountInfo<'info>,
+    authority: &AccountInfo<'info>,
+    system_program: &AccountInfo<'info>,
+    plugin_type: u8,
+    signer_seeds: &[&[&[u8]]],
+) -> Result<()> {
+    invoke_core(
+        core_program,
+        vec![
+            AccountMeta::new(asset.key(), false),
+            AccountMeta::new(collection.key(), false),
+            AccountMeta::new(payer.key(), true),
+            AccountMeta::new_readonly(authority.key(), true),
+            AccountMeta::new_readonly(system_program.key(), false),
+            AccountMeta::new_readonly(CORE_PROGRAM_ID, false),
+        ],
+        vec![
+            asset.clone(),
+            collection.clone(),
+            payer.clone(),
+            authority.clone(),
+            system_program.clone(),
+            core_program.clone(),
+        ],
+        vec![4, plugin_type],
         signer_seeds,
     )
 }
