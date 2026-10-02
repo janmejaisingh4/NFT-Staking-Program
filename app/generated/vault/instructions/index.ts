@@ -6,5 +6,10 @@
  * @see https://github.com/codama-idl/codama
  */
 
+export * from "./burnStakedNft";
+export * from "./claimRewards";
 export * from "./deposit";
+export * from "./initializePool";
+export * from "./stakeNft";
+export * from "./unstakeNft";
 export * from "./withdraw";

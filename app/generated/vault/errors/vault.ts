@@ -18,14 +18,43 @@ import { VAULT_PROGRAM_ADDRESS } from "../programs";
 export const VAULT_ERROR__VAULT_ALREADY_EXISTS = 0x1770; // 6000
 /** InvalidAmount: Invalid amount */
 export const VAULT_ERROR__INVALID_AMOUNT = 0x1771; // 6001
+/** NoStakedAssets: No staked assets remain in the pool */
+export const VAULT_ERROR__NO_STAKED_ASSETS = 0x1772; // 6002
+/** NoRewardsAvailable: No rewards are available to claim */
+export const VAULT_ERROR__NO_REWARDS_AVAILABLE = 0x1773; // 6003
+/** Unauthorized: The signer does not own this stake */
+export const VAULT_ERROR__UNAUTHORIZED = 0x1774; // 6004
+/** InvalidStakeRecord: The stake record does not match the provided asset */
+export const VAULT_ERROR__INVALID_STAKE_RECORD = 0x1775; // 6005
+/** InvalidClock: The on-chain clock is invalid */
+export const VAULT_ERROR__INVALID_CLOCK = 0x1776; // 6006
+/** RewardCalculationOverflow: Reward calculation overflow */
+export const VAULT_ERROR__REWARD_CALCULATION_OVERFLOW = 0x1777; // 6007
+/** InvalidCoreProgram: Invalid Metaplex Core program */
+export const VAULT_ERROR__INVALID_CORE_PROGRAM = 0x1778; // 6008
 
 export type VaultError =
-  typeof VAULT_ERROR__INVALID_AMOUNT | typeof VAULT_ERROR__VAULT_ALREADY_EXISTS;
+  | typeof VAULT_ERROR__INVALID_AMOUNT
+  | typeof VAULT_ERROR__INVALID_CLOCK
+  | typeof VAULT_ERROR__INVALID_CORE_PROGRAM
+  | typeof VAULT_ERROR__INVALID_STAKE_RECORD
+  | typeof VAULT_ERROR__NO_REWARDS_AVAILABLE
+  | typeof VAULT_ERROR__NO_STAKED_ASSETS
+  | typeof VAULT_ERROR__REWARD_CALCULATION_OVERFLOW
+  | typeof VAULT_ERROR__UNAUTHORIZED
+  | typeof VAULT_ERROR__VAULT_ALREADY_EXISTS;
 
 let vaultErrorMessages: Record<VaultError, string> | undefined;
 if (process.env.NODE_ENV !== "production") {
   vaultErrorMessages = {
     [VAULT_ERROR__INVALID_AMOUNT]: `Invalid amount`,
+    [VAULT_ERROR__INVALID_CLOCK]: `The on-chain clock is invalid`,
+    [VAULT_ERROR__INVALID_CORE_PROGRAM]: `Invalid Metaplex Core program`,
+    [VAULT_ERROR__INVALID_STAKE_RECORD]: `The stake record does not match the provided asset`,
+    [VAULT_ERROR__NO_REWARDS_AVAILABLE]: `No rewards are available to claim`,
+    [VAULT_ERROR__NO_STAKED_ASSETS]: `No staked assets remain in the pool`,
+    [VAULT_ERROR__REWARD_CALCULATION_OVERFLOW]: `Reward calculation overflow`,
+    [VAULT_ERROR__UNAUTHORIZED]: `The signer does not own this stake`,
     [VAULT_ERROR__VAULT_ALREADY_EXISTS]: `Vault already exists`,
   };
 }

@@ -17,17 +17,68 @@ import {
   type ReadonlyUint8Array,
 } from "@solana/kit";
 import {
+  parseBurnStakedNftInstruction,
+  parseClaimRewardsInstruction,
   parseDepositInstruction,
+  parseInitializePoolInstruction,
+  parseStakeNftInstruction,
+  parseUnstakeNftInstruction,
   parseWithdrawInstruction,
+  type ParsedBurnStakedNftInstruction,
+  type ParsedClaimRewardsInstruction,
   type ParsedDepositInstruction,
+  type ParsedInitializePoolInstruction,
+  type ParsedStakeNftInstruction,
+  type ParsedUnstakeNftInstruction,
   type ParsedWithdrawInstruction,
 } from "../instructions";
 
 export const VAULT_PROGRAM_ADDRESS =
   "7tGGvLyrnSdFr5o8Qcfbw2spARwMfFCf7sv8bMZ3k9mv" as Address<"7tGGvLyrnSdFr5o8Qcfbw2spARwMfFCf7sv8bMZ3k9mv">;
 
+export enum VaultAccount {
+  StakeRecord,
+  StakingPool,
+}
+
+export function identifyVaultAccount(
+  account: { data: ReadonlyUint8Array } | ReadonlyUint8Array,
+): VaultAccount {
+  const data = "data" in account ? account.data : account;
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([174, 163, 11, 208, 150, 236, 11, 205]),
+      ),
+      0,
+    )
+  ) {
+    return VaultAccount.StakeRecord;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([203, 19, 214, 220, 220, 154, 24, 102]),
+      ),
+      0,
+    )
+  ) {
+    return VaultAccount.StakingPool;
+  }
+  throw new Error(
+    "The provided account could not be identified as a vault account.",
+  );
+}
+
 export enum VaultInstruction {
+  BurnStakedNft,
+  ClaimRewards,
   Deposit,
+  InitializePool,
+  StakeNft,
+  UnstakeNft,
   Withdraw,
 }
 
@@ -39,12 +90,67 @@ export function identifyVaultInstruction(
     containsBytes(
       data,
       fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([218, 19, 0, 8, 188, 214, 133, 38]),
+      ),
+      0,
+    )
+  ) {
+    return VaultInstruction.BurnStakedNft;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([4, 144, 132, 71, 116, 23, 151, 80]),
+      ),
+      0,
+    )
+  ) {
+    return VaultInstruction.ClaimRewards;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
         new Uint8Array([242, 35, 198, 137, 82, 225, 242, 182]),
       ),
       0,
     )
   ) {
     return VaultInstruction.Deposit;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([95, 180, 10, 172, 84, 174, 232, 40]),
+      ),
+      0,
+    )
+  ) {
+    return VaultInstruction.InitializePool;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([38, 27, 66, 46, 69, 65, 151, 219]),
+      ),
+      0,
+    )
+  ) {
+    return VaultInstruction.StakeNft;
+  }
+  if (
+    containsBytes(
+      data,
+      fixEncoderSize(getBytesEncoder(), 8).encode(
+        new Uint8Array([17, 182, 24, 211, 101, 138, 50, 163]),
+      ),
+      0,
+    )
+  ) {
+    return VaultInstruction.UnstakeNft;
   }
   if (
     containsBytes(
@@ -66,8 +172,23 @@ export type ParsedVaultInstruction<
   TProgram extends string = "7tGGvLyrnSdFr5o8Qcfbw2spARwMfFCf7sv8bMZ3k9mv",
 > =
   | ({
+      instructionType: VaultInstruction.BurnStakedNft;
+    } & ParsedBurnStakedNftInstruction<TProgram>)
+  | ({
+      instructionType: VaultInstruction.ClaimRewards;
+    } & ParsedClaimRewardsInstruction<TProgram>)
+  | ({
       instructionType: VaultInstruction.Deposit;
     } & ParsedDepositInstruction<TProgram>)
+  | ({
+      instructionType: VaultInstruction.InitializePool;
+    } & ParsedInitializePoolInstruction<TProgram>)
+  | ({
+      instructionType: VaultInstruction.StakeNft;
+    } & ParsedStakeNftInstruction<TProgram>)
+  | ({
+      instructionType: VaultInstruction.UnstakeNft;
+    } & ParsedUnstakeNftInstruction<TProgram>)
   | ({
       instructionType: VaultInstruction.Withdraw;
     } & ParsedWithdrawInstruction<TProgram>);
@@ -77,11 +198,46 @@ export function parseVaultInstruction<TProgram extends string>(
 ): ParsedVaultInstruction<TProgram> {
   const instructionType = identifyVaultInstruction(instruction);
   switch (instructionType) {
+    case VaultInstruction.BurnStakedNft: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: VaultInstruction.BurnStakedNft,
+        ...parseBurnStakedNftInstruction(instruction),
+      };
+    }
+    case VaultInstruction.ClaimRewards: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: VaultInstruction.ClaimRewards,
+        ...parseClaimRewardsInstruction(instruction),
+      };
+    }
     case VaultInstruction.Deposit: {
       assertIsInstructionWithAccounts(instruction);
       return {
         instructionType: VaultInstruction.Deposit,
         ...parseDepositInstruction(instruction),
+      };
+    }
+    case VaultInstruction.InitializePool: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: VaultInstruction.InitializePool,
+        ...parseInitializePoolInstruction(instruction),
+      };
+    }
+    case VaultInstruction.StakeNft: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: VaultInstruction.StakeNft,
+        ...parseStakeNftInstruction(instruction),
+      };
+    }
+    case VaultInstruction.UnstakeNft: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: VaultInstruction.UnstakeNft,
+        ...parseUnstakeNftInstruction(instruction),
       };
     }
     case VaultInstruction.Withdraw: {

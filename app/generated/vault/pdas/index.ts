@@ -6,4 +6,7 @@
  * @see https://github.com/codama-idl/codama
  */
 
+export * from "./authority";
+export * from "./pool";
+export * from "./stakeRecord";
 export * from "./vault";
