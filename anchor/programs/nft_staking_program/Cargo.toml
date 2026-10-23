@@ -1,0 +1,30 @@
+[package]
+name = "vault"
+version = "0.1.0"
+description = "A simple SOL vault program"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "vault"
+
+[features]
+default = []
+anchor-debug = []
+cpi = ["no-entrypoint"]
+custom-heap = []
+custom-panic = []
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = { version = "0.32.1", features = ["init-if-needed"] }
+anchor-spl = { version = "0.32.1", features = ["associated_token", "token"] }
+mpl-core = { version = "0.12.1", default-features = false, features = ["anchor-0-32"] }
+
+[dev-dependencies]
+litesvm = "=0.7.1"
+solana-sdk = "2.3"
+solana-program-runtime = "=2.3.13"

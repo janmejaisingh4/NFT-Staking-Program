@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-vault = "7tGGvLyrnSdFr5o8Qcfbw2spARwMfFCf7sv8bMZ3k9mv"
+nft_staking_program = "HBYJKygWr7gyRa4N3mCdEziW2KAQB9y9TMPcEaLESMoR"
 
 [registry]
 url = "https://api.apr.dev"
